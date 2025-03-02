@@ -54,12 +54,13 @@ export default defineConfig(({ mode }) => {
         external: ['hardhat'],
       },
       sourcemap: true,
-      minify: 'terser',
-      terserOptions: {
-        compress: {
-          drop_console: false,
+      minify: 'esbuild',
+      ...(mode === 'production' ? {
+        minify: 'esbuild',
+        esbuildOptions: {
+          drop: ['console', 'debugger'],
         },
-      },
+      } : {})
     }
   }
 })
