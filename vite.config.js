@@ -6,6 +6,10 @@ import { nodePolyfills } from 'vite-plugin-node-polyfills'
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
   
+  // Log environment variables (without sensitive values)
+  console.log('Environment mode:', mode)
+  console.log('Environment variables loaded:', Object.keys(env).filter(key => key.startsWith('VITE_')))
+
   return {
     plugins: [
       react(),
@@ -28,6 +32,8 @@ export default defineConfig(({ mode }) => {
     define: {
       'process.env.VITE_INFURA_PROJECT_ID': JSON.stringify(env.VITE_INFURA_PROJECT_ID),
       'process.env.VITE_PRIVATE_KEY': JSON.stringify(env.VITE_PRIVATE_KEY),
+      'import.meta.env.VITE_INFURA_PROJECT_ID': JSON.stringify(env.VITE_INFURA_PROJECT_ID),
+      'import.meta.env.VITE_PRIVATE_KEY': JSON.stringify(env.VITE_PRIVATE_KEY),
     },
     resolve: {
       alias: {
@@ -46,6 +52,13 @@ export default defineConfig(({ mode }) => {
     build: {
       rollupOptions: {
         external: ['hardhat'],
+      },
+      sourcemap: true,
+      minify: 'terser',
+      terserOptions: {
+        compress: {
+          drop_console: false,
+        },
       },
     }
   }

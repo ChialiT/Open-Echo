@@ -5,12 +5,21 @@ import ResponseForm from "./ResponseForm";
 import WalletAuth from "./WalletAuth";
 
 const CHAIN_ID = 11155111;
-const INFURA_PROJECT_ID = import.meta.env.VITE_INFURA_PROJECT_ID;
+const INFURA_PROJECT_ID = process.env.VITE_INFURA_PROJECT_ID;
+
+// Validate environment variables
+if (!INFURA_PROJECT_ID) {
+  console.error('🚫 Missing VITE_INFURA_PROJECT_ID environment variable');
+}
+
+// Log the first few characters of the Infura ID for debugging (safely)
+console.log('Infura Project ID prefix:', INFURA_PROJECT_ID ? `${INFURA_PROJECT_ID.slice(0, 4)}...` : 'not set');
 
 export default function Dashboard() {
   const { logout, user, ready } = usePrivy();
   const [isWalletReady, setIsWalletReady] = useState(false);
   const [networkReady, setNetworkReady] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const checkWallet = async () => {
@@ -18,10 +27,15 @@ export default function Dashboard() {
       console.log("Dashboard state:", {
         ready,
         hasUser: !!user,
-        hasWallet: !!user?.wallet
+        hasWallet: !!user?.wallet,
+        hasInfuraId: !!INFURA_PROJECT_ID
       });
 
       try {
+        if (!INFURA_PROJECT_ID) {
+          throw new Error("Infura Project ID is not configured");
+        }
+
         if (!ready || !user?.wallet?.address) {
           console.log("⏳ Waiting for wallet initialization...");
           setIsWalletReady(false);
@@ -47,11 +61,13 @@ export default function Dashboard() {
         });
 
         setNetworkReady(chainId === CHAIN_ID);
+        setError(null);
 
       } catch (error) {
         console.error("❌ Error checking wallet status:", error);
         setIsWalletReady(false);
         setNetworkReady(false);
+        setError(error.message);
       }
     };
 
@@ -67,6 +83,7 @@ export default function Dashboard() {
     walletAddress: displayAddress,
     isWalletReady,
     networkReady,
+    error,
     componentStates: {
       showWalletInit: !walletAddress,
       showWalletConnecting: !isWalletReady && walletAddress,
@@ -114,6 +131,11 @@ export default function Dashboard() {
 
       <div className="space-y-6">
         <WalletAuth />
+        {error && (
+          <div className="bg-red-50 p-4 rounded-md text-red-700">
+            {error}
+          </div>
+        )}
         {!walletAddress ? (
           <div className="bg-yellow-50 p-4 rounded-md text-yellow-700">
             Please wait while we initialize your wallet...

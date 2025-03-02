@@ -6,6 +6,14 @@ import './index.css'
 
 const INFURA_PROJECT_ID = process.env.VITE_INFURA_PROJECT_ID;
 
+// Validate environment variables
+if (!INFURA_PROJECT_ID) {
+  console.error('🚫 Missing VITE_INFURA_PROJECT_ID environment variable');
+}
+
+// Log the first few characters of the Infura ID for debugging (safely)
+console.log('Infura Project ID prefix:', INFURA_PROJECT_ID ? `${INFURA_PROJECT_ID.slice(0, 4)}...` : 'not set');
+
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <PrivyProvider
