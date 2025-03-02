@@ -1,0 +1,101 @@
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
+
+# testing
+/coverage
+
+# production
+/build
+/dist
+
+# misc
+.DS_Store
+.env
+.env.local
+.env.development
+.env.development.local
+.env.test.local
+.env.production.local
+.env.production
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# hardhat
+/cache
+/artifacts
+
+# local env files
+.env*.local
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# Logs
+logs
+*.log
+pnpm-debug.log*
+lerna-debug.log*
+
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+
+# EAS specific
+/eas/config/secrets.js
+/eas/config/.env
+
+# TypeChain files
+/typechain
+/typechain-types
+
+# solidity-coverage files
+/coverage
+/coverage.json
+
+# Hardhat Ignition default folder for deployments against a local node
+ignition/deployments/chain-31337
+
+# Wallet and keys
+**/wallet-config.json
+**/wallet-addresses.json
+**/addresses.json
+**/*wallet*.json
+**/*private*.json
+**/*secret*.json
+**/*key*.json
+.secret
+.secret.json
+.mnemonic
+.mnemonic.txt
+.privatekey
+.privatekey.txt
+wallet.json
+wallet.txt
+mnemonic.txt
+private.key
+keystore/
+wallets/
+
+# Contract deployment
+deployed-contracts.json
+deployment-addresses.json
+.openzeppelin/unknown-*.json

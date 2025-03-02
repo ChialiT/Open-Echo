@@ -1,0 +1,10 @@
+{
+  "uid": "0x0190465f8c9761f85f86d9d28108c7d7ddb2fa2c7ab0353a4d06458d22909a45",
+  "schema": "string created_at, string user_id, string response",
+  "transactionHash": "0x58ee1e95e154030c02c40ad473a3199f9e60b2d36415517f1c89d71b5004c05f",
+  "deployedAt": "2024-03-01T23:31:24.000Z",
+  "contractAddress": "0x0a7E2Ff54e76B8E6659aedc9103FB21c038050D0",
+  "resolverAddress": "0x0000000000000000000000000000000000000000",
+  "revocable": true,
+  "creator": "0x5F8782CE2a915178d2aa728f278BCCB156D78df7"
+}
