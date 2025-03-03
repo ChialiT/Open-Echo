@@ -1,15 +1,16 @@
 import { usePrivy } from "@privy-io/react-auth";
 import { useState, useEffect } from "react";
-import { ethers } from "ethers";
+import { createPublicClient, http } from "viem";
 
-const CHAIN_ID = 11155111;
 const INFURA_PROJECT_ID = import.meta.env.VITE_INFURA_PROJECT_ID;
+const SEPOLIA_CHAIN_ID = 11155111;
 
 export default function WalletAuth() {
   const { authenticated, user, ready } = usePrivy();
   const [walletAddress, setWalletAddress] = useState(null);
   const [walletStatus, setWalletStatus] = useState('initializing');
   const [networkStatus, setNetworkStatus] = useState('checking');
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const initWallet = async () => {
@@ -44,31 +45,47 @@ export default function WalletAuth() {
         setWalletAddress(user.wallet.address);
         setWalletStatus('ready');
 
-        console.log("🌐 Connecting to Sepolia via Infura...");
-        const provider = new ethers.JsonRpcProvider(
-          `https://sepolia.infura.io/v3/${INFURA_PROJECT_ID}`
-        );
-
-        const network = await provider.getNetwork();
-        console.log("🔗 Connected to network:", {
-          name: network.name,
-          chainId: Number(network.chainId)
-        });
-
-        const chainId = Number(network.chainId);
-        if (chainId !== CHAIN_ID) {
-          console.error("❌ Wrong network:", chainId);
-          setNetworkStatus('wrong-network');
+        if (!INFURA_PROJECT_ID) {
+          console.error("🚫 Missing INFURA_PROJECT_ID");
+          setError("Missing Infura Project ID");
+          setNetworkStatus('error');
           return;
         }
 
-        console.log("✅ Connected to Sepolia network");
-        setNetworkStatus('connected');
+        try {
+          console.log("🌐 Connecting to Sepolia via Infura...");
+          
+          // Create a viem public client
+          const client = createPublicClient({
+            chain: {
+              id: SEPOLIA_CHAIN_ID,
+              name: 'Sepolia',
+              network: 'sepolia',
+              nativeCurrency: {
+                name: 'Sepolia Ether',
+                symbol: 'ETH',
+                decimals: 18
+              }
+            },
+            transport: http(`https://sepolia.infura.io/v3/${INFURA_PROJECT_ID}`)
+          });
 
+          // Check if we can connect to the network
+          const blockNumber = await client.getBlockNumber();
+          console.log("🔗 Connected to Sepolia network, block:", blockNumber);
+          
+          setNetworkStatus('connected');
+          setError(null);
+        } catch (networkError) {
+          console.error("❌ Network connection error:", networkError);
+          setNetworkStatus('error');
+          setError(`Network error: ${networkError.message}`);
+        }
       } catch (error) {
         console.error("❌ Wallet initialization error:", error);
         setWalletStatus('error');
         setNetworkStatus('error');
+        setError(`Wallet error: ${error.message}`);
       }
     };
 
@@ -77,6 +94,8 @@ export default function WalletAuth() {
 
   return (
     <div className="p-4 bg-white shadow-md rounded-md space-y-4">
+      <h2 className="text-xl font-semibold">Wallet Status</h2>
+      
       {walletStatus === 'initializing' && (
         <p className="text-yellow-600">
           Initializing wallet...
@@ -87,12 +106,12 @@ export default function WalletAuth() {
         <p className="text-red-500">No wallet available. Please try logging out and back in.</p>
       )}
       
-      {walletStatus === 'provider-error' && (
-        <p className="text-red-500">Error connecting to wallet provider. Please refresh and try again.</p>
-      )}
-      
       {walletStatus === 'error' && (
         <p className="text-red-500">Error initializing wallet. Please refresh the page.</p>
+      )}
+      
+      {error && (
+        <p className="text-red-500 bg-red-50 p-2 rounded">{error}</p>
       )}
       
       {walletStatus === 'ready' && walletAddress && (

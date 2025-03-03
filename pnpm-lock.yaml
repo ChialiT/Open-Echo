@@ -32,6 +32,9 @@ importers:
       stream-browserify:
         specifier: ^3.0.0
         version: 3.0.0
+      viem:
+        specifier: ^2.23.5
+        version: 2.23.5(bufferutil@4.0.9)(typescript@5.8.2)(utf-8-validate@5.0.10)(zod@3.24.2)
     devDependencies:
       '@nomicfoundation/hardhat-chai-matchers':
         specifier: ^2.0.8

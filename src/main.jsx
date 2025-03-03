@@ -4,7 +4,7 @@ import { PrivyProvider } from '@privy-io/react-auth'
 import App from './App'
 import './index.css'
 
-const INFURA_PROJECT_ID = process.env.VITE_INFURA_PROJECT_ID;
+const INFURA_PROJECT_ID = import.meta.env.VITE_INFURA_PROJECT_ID;
 
 // Validate environment variables
 if (!INFURA_PROJECT_ID) {
