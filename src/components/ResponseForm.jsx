@@ -19,6 +19,35 @@ const EAS_CONTRACT_ADDRESS = "0xC2679fBD37d54388Ce493F1DB75320D236e1815e";
 // Master wallet for transactions (has funds)
 const PRIVATE_KEY = import.meta.env.VITE_PRIVATE_KEY;
 
+// Format validation for private key
+function isValidPrivateKey(key) {
+  try {
+    // Check if it's a valid hex string (with or without 0x prefix)
+    let formattedKey = key;
+    if (!key.startsWith('0x')) {
+      formattedKey = `0x${key}`;
+    }
+    
+    // Validate length (private keys are 32 bytes = 64 hex chars + optional 0x prefix)
+    const keyWithoutPrefix = formattedKey.startsWith('0x') ? formattedKey.slice(2) : formattedKey;
+    if (keyWithoutPrefix.length !== 64) {
+      return false;
+    }
+    
+    // Check if it's a valid hex string
+    if (!/^(0x)?[0-9a-fA-F]{64}$/.test(formattedKey)) {
+      return false;
+    }
+    
+    // Final validation by attempting to create a wallet
+    new ethers.Wallet(formattedKey);
+    return true;
+  } catch (error) {
+    console.error("Private key validation error:", error.message);
+    return false;
+  }
+}
+
 // Validation
 if (!INFURA_PROJECT_ID) {
   console.error('🚫 Missing VITE_INFURA_PROJECT_ID environment variable');
@@ -26,6 +55,8 @@ if (!INFURA_PROJECT_ID) {
 
 if (!PRIVATE_KEY) {
   console.error('🚫 Missing VITE_PRIVATE_KEY environment variable');
+} else if (!isValidPrivateKey(PRIVATE_KEY)) {
+  console.error('🚫 Invalid VITE_PRIVATE_KEY format. Must be a 64-character hex string (with optional 0x prefix)');
 }
 
 /**
@@ -64,8 +95,16 @@ export default function ResponseForm() {
 
         const userAddress = await wallets[0].address;
 
-        if (!INFURA_PROJECT_ID || !PRIVATE_KEY) {
-          throw new Error("Missing required environment variables");
+        if (!INFURA_PROJECT_ID) {
+          throw new Error("Missing Infura Project ID");
+        }
+
+        if (!PRIVATE_KEY) {
+          throw new Error("Missing Private Key");
+        }
+
+        if (!isValidPrivateKey(PRIVATE_KEY)) {
+          throw new Error("Invalid Private Key format");
         }
 
         // Create chain configuration
@@ -93,7 +132,13 @@ export default function ResponseForm() {
 
         // Initialize master wallet with private key
         try {
-          const masterWalletInstance = new ethers.Wallet(PRIVATE_KEY);
+          // Ensure the private key has the correct format
+          let formattedKey = PRIVATE_KEY;
+          if (!formattedKey.startsWith('0x')) {
+            formattedKey = `0x${formattedKey}`;
+          }
+          
+          const masterWalletInstance = new ethers.Wallet(formattedKey);
           const ethersProvider = new ethers.JsonRpcProvider(`https://sepolia.infura.io/v3/${INFURA_PROJECT_ID}`);
           const connectedWallet = masterWalletInstance.connect(ethersProvider);
           
@@ -105,8 +150,12 @@ export default function ResponseForm() {
           }
           
           setMasterWallet(connectedWallet);
+          console.log("✅ Master wallet initialized with address:", masterWalletInstance.address);
         } catch (walletError) {
+          console.error("❌ Master wallet initialization error:", walletError);
           setError(`Master wallet error: ${walletError.message}`);
+          setLoadingProvider(false);
+          return;
         }
         
         try {
